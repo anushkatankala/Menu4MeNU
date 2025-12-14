@@ -41,11 +41,13 @@ const Header = () => {
           </button>
 
           <button
-            onClick={toggleDarkMode} /* use toggle function to change what button says */
-            className="px-4 py-2 rounded-full bg-muted text-foreground hover:bg-secondary/80 transition-all"
-        >
-          {isDark ? "Toggle Light Mode" : "Toggle Dark Mode"} 
-        </button>
+            onClick={toggleDarkMode}
+            className="px-4 py-2 rounded-full bg-muted text-foreground 
+                      hover:bg-secondary/80 transform transition-transform duration-200 hover:scale-105"
+          >
+            {isDark ? "Toggle Light Mode" : "Toggle Dark Mode"}
+          </button>
+           
         </div>
       </div>
     </header>;

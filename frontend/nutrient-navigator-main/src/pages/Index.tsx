@@ -7,15 +7,18 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
+
   return (
     <main className="min-h-screen">
-      <Header />
-      <HeroSection />
-      <NutrientSelector />
-      <HowItWorks />
-      <FeaturesSection />
-      <CTASection />
-      <Footer />
+      <div id="tts-content">
+          <Header />
+          <HeroSection />
+          <NutrientSelector />
+          <HowItWorks />
+          <FeaturesSection />
+          <CTASection />
+        </div>
+        <Footer />
     </main>
   );
 };

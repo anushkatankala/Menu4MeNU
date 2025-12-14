@@ -170,144 +170,144 @@ const Recipes = () => {
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
-
-      {/* Hero Section */}
-      <section className="pt-28 pb-12 sm:pt-32 sm:pb-16 gradient-hero">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-up">
-              Our Recipe Collection
-            </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground animate-fade-up" style={{ animationDelay: "0.1s" }}>
-              Discover nutritious and delicious meals tailored to your dietary needs
-            </p>
-          </div>
-
-          {/* Search and Filter Bar */}
-          <div className="mt-10 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search recipes or nutrients..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-card border-border rounded-full text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="h-12 px-6 rounded-full gap-2"
-              >
-                <Filter className="w-4 h-4" />
-                Filter
-                <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
-              </Button>
+      <div id="tts-content">
+        <Header />
+        {/* Hero Section */}
+        <section className="pt-28 pb-12 sm:pt-32 sm:pb-16 gradient-hero">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-up">
+                Our Recipe Collection
+              </h1>
+              <p className="text-lg sm:text-xl text-muted-foreground animate-fade-up" style={{ animationDelay: "0.1s" }}>
+                Discover nutritious and delicious meals tailored to your dietary needs
+              </p>
             </div>
 
-            {/* Category Filters */}
-            {showFilters && (
-              <div className="mt-4 flex flex-wrap gap-2 justify-center animate-fade-in">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
-                      selectedCategory === category
-                        ? "bg-primary text-primary-foreground shadow-soft"
-                        : "bg-card border border-border text-foreground hover:border-primary"
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
+            {/* Search and Filter Bar */}
+            <div className="mt-10 max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.2s" }}>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search recipes or nutrients..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 h-12 bg-card border-border rounded-full text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="h-12 px-6 rounded-full gap-2"
+                >
+                  <Filter className="w-4 h-4" />
+                  Filter
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+                </Button>
+              </div>
+
+              {/* Category Filters */}
+              {showFilters && (
+                <div className="mt-4 flex flex-wrap gap-2 justify-center animate-fade-in">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
+                        selectedCategory === category
+                          ? "bg-primary text-primary-foreground shadow-soft"
+                          : "bg-card border border-border text-foreground hover:border-primary"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Recipes Grid */}
+        <section className="py-12 sm:py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <p className="text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{filteredRecipes.length}</span> recipes
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredRecipes.map((recipe, index) => (
+                <article
+                  key={recipe.id}
+                  className="group glass-card overflow-hidden hover:shadow-card transition-all duration-300 animate-fade-up cursor-pointer"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  {/* Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={recipe.image}
+                      alt={recipe.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <Badge className="absolute top-3 left-3 bg-background/90 text-foreground backdrop-blur-sm">
+                      {recipe.category}
+                    </Badge>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                      {recipe.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{recipe.description}</p>
+
+                    {/* Nutrients */}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {recipe.nutrients.slice(0, 3).map((nutrient) => (
+                        <span
+                          key={nutrient}
+                          className="text-xs px-2 py-1 rounded-full bg-mint text-forest font-medium"
+                        >
+                          {nutrient}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Meta Info */}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground pt-4 border-t border-border">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4" />
+                        {recipe.prepTime}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4" />
+                        {recipe.servings}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Flame className="w-4 h-4" />
+                        {recipe.calories} cal
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {filteredRecipes.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground text-lg">No recipes found matching your criteria.</p>
+                <Button variant="outline" className="mt-4" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}>
+                  Clear filters
+                </Button>
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Recipes Grid */}
-      <section className="py-12 sm:py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <p className="text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filteredRecipes.length}</span> recipes
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredRecipes.map((recipe, index) => (
-              <article
-                key={recipe.id}
-                className="group glass-card overflow-hidden hover:shadow-card transition-all duration-300 animate-fade-up cursor-pointer"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                {/* Image */}
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={recipe.image}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <Badge className="absolute top-3 left-3 bg-background/90 text-foreground backdrop-blur-sm">
-                    {recipe.category}
-                  </Badge>
-                </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                    {recipe.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{recipe.description}</p>
-
-                  {/* Nutrients */}
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {recipe.nutrients.slice(0, 3).map((nutrient) => (
-                      <span
-                        key={nutrient}
-                        className="text-xs px-2 py-1 rounded-full bg-mint text-forest font-medium"
-                      >
-                        {nutrient}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Meta Info */}
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground pt-4 border-t border-border">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
-                      {recipe.prepTime}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-4 h-4" />
-                      {recipe.servings}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Flame className="w-4 h-4" />
-                      {recipe.calories} cal
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {filteredRecipes.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">No recipes found matching your criteria.</p>
-              <Button variant="outline" className="mt-4" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}>
-                Clear filters
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
-
+        </section>
+      </div>
       <Footer />
     </main>
   );
