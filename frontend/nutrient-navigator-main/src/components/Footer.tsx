@@ -19,23 +19,51 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
-            <ul className="space-y-3">
-              <li><a href="#nutrients" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Find Nutrients</a></li>
-              <li><a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-sm">How It Works</a></li>
-              <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Features</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Recipes</a></li>
-            </ul>
+            <div className="flex flex-col gap-4">
+                <a
+                  href="/recipes"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  Recipes
+                </a>
+                <a
+                  href="/favorites"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  Favorites
+                </a>
+                <a
+                  href="/nutrients"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  Nutrients
+                </a>
+                <a
+                  href="/#how-it-works"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  How It Works
+                </a>
+              </div>
           </div>
 
           {/* Resources */}
           <div>
             <h4 className="font-semibold text-foreground mb-4">Resources</h4>
-            <ul className="space-y-3">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Nutrition Guide</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Blog</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">FAQ</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Support</a></li>
-            </ul>
+            <div className="flex flex-col gap-4">
+                <a
+                  href="/#footer"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  Daily Blog
+                </a>
+                <a
+                  href="/#footer"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  About Us
+                </a>
+              </div>
           </div>
 
           {/* Contact */}

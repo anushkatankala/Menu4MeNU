@@ -23,20 +23,19 @@ const Header = ({ isDark, toggleDarkMode }: HeaderProps) => {
             <a href="/recipes" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Recipes
             </a>
-            <a href="/#nutrients" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <a href="/favorites"
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+            >
+              Favorites
+            </a>
+            <a href="/nutrients" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Nutrients
             </a>
             <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               How It Works
             </a>
-            <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-              Features
-            </a>
-          </nav>
 
-          <button className="px-4 py-2 rounded-full bg-accent text-foreground hover:bg-secondary/80 transition-all">
-            Get Started
-          </button>
+          </nav>
 
           <button
             onClick={toggleDarkMode}

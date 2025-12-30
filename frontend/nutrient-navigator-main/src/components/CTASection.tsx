@@ -1,7 +1,8 @@
 import { ArrowRight } from "lucide-react";
-import { Button } from "./ui/button";
+
 const CTASection = () => {
-  return <section className="py-20 sm:py-32 relative overflow-hidden">
+  return (
+    <section className="py-20 sm:py-32 relative overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-sage/20 to-peach/20" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
@@ -12,29 +13,28 @@ const CTASection = () => {
             Ready to Transform
             <span className="text-primary block">Your Nutrition?</span>
           </h2>
-          
-          <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up" style={{
-          animationDelay: '0.1s'
-        }}>
+
+          <p
+            className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up"
+            style={{ animationDelay: "0.1s" }}
+          >
             Join thousands of health-conscious food lovers who have discovered the perfect balance of taste and nutrition.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{
-          animationDelay: '0.2s'
-        }}>
-            <button className="px-6 py-3 rounded-full bg-accent text-foreground hover:bg-secondary/80 transition-all flex items-center gap-2">
+          {/* Centered Button */}
+          <div className="animate-fade-up" style={{ animationDelay: "0.2s" }}>
+            <a
+              href="/recipes"
+              className="inline-flex px-6 py-3 rounded-full bg-accent text-foreground hover:bg-secondary/80 transition-all items-center gap-2"
+            >
               Start Your Journey
               <ArrowRight className="w-5 h-5" />
-            </button>
-
-            <Button variant="outline" size="lg">
-              View Sample Meals
-            </Button>
+            </a>
           </div>
-
-          
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default CTASection;
