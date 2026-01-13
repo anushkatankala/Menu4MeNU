@@ -1,11 +1,13 @@
 package FoodApplication.controller;
 
 import FoodApplication.model.Food;
+import FoodApplication.service.RecipesExcelService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,29 +21,30 @@ import java.util.List;
 @RequestMapping("/api/foods")
 public class FoodController {
 
+    private final RecipesExcelService recipesExcelService;
+
+    public FoodController(RecipesExcelService recipesExcelService) {
+        this.recipesExcelService = recipesExcelService;
+    }
+
     /**
      * GET /api/foods
-     * Reads foods.xlsx from the resources folder and returns all rows as a list of Food objects.
+     * Reads recipes.xlsx from the resources folder and returns all rows as a list of Food objects.
      */
     @GetMapping
     public ResponseEntity<List<Food>> getAllFoods() {
         List<Food> foods = new ArrayList<>();
-
-        // Name of the Excel file inside src/main/resources
         String excelFileName = "recipes.xlsx";
 
         try (InputStream is = new ClassPathResource(excelFileName).getInputStream();
              Workbook workbook = new XSSFWorkbook(is)) {
 
-            Sheet sheet = workbook.getSheetAt(0); // First sheet
+            Sheet sheet = workbook.getSheetAt(0);
 
             // Assume first row is header, so start from row 1
             for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex);
-
-                if (row == null) {
-                    continue; // skip empty row
-                }
+                if (row == null) continue;
 
                 String name = getCellStringValue(row.getCell(0));
                 String mainNutrition = getCellStringValue(row.getCell(1));
@@ -65,29 +68,38 @@ public class FoodController {
             return ResponseEntity.ok(foods);
 
         } catch (IOException e) {
-            // If something goes wrong reading the file, return 500
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
 
     /**
+     * POST /api/foods/import
+     * Imports recipes.xlsx into PostgreSQL (creates table + inserts rows).
+     */
+    @GetMapping("/import")
+    public ResponseEntity<String> importExcelToPostgres() {
+        recipesExcelService.importExcelToPostgres();
+        return ResponseEntity.ok("Imported recipes.xlsx into PostgreSQL");
+    }
+
+    /**
      * Safely get a String from a cell (handles nulls and different cell types).
      */
     private String getCellStringValue(Cell cell) {
-        if (cell == null) {
-            return "";
-        }
+        if (cell == null) return "";
 
-        if (cell.getCellType() == CellType.STRING) {
+        CellType type = cell.getCellType();
+
+        if (type == CellType.STRING) {
             return cell.getStringCellValue().trim();
-        } else if (cell.getCellType() == CellType.NUMERIC) {
-            // Convert numeric to string (e.g., for IDs, simple numbers)
+        } else if (type == CellType.NUMERIC) {
+            // If you want integers without .0, you can adjust this later.
             return String.valueOf(cell.getNumericCellValue());
-        } else if (cell.getCellType() == CellType.BOOLEAN) {
+        } else if (type == CellType.BOOLEAN) {
             return String.valueOf(cell.getBooleanCellValue());
-        } else if (cell.getCellType() == CellType.FORMULA) {
-            // Evaluate formula result as string if possible
+        } else if (type == CellType.FORMULA) {
+            // Try to read formula result as string, otherwise numeric
             try {
                 return cell.getStringCellValue().trim();
             } catch (IllegalStateException e) {
@@ -98,6 +110,7 @@ public class FoodController {
                 }
             }
         }
+
         return "";
     }
 
@@ -116,6 +129,8 @@ public class FoodController {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .forEach(list::add);
+
         return list;
     }
 }
+
