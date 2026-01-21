@@ -34,6 +34,9 @@ const Header = ({ isDark, toggleDarkMode }: HeaderProps) => {
             <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               How It Works
             </a>
+            <a href="/household" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+              My Household
+            </a>
 
           </nav>
 
