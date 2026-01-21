@@ -20,6 +20,9 @@ const Header = ({ isDark, toggleDarkMode }: HeaderProps) => {
           </a>
 
           <nav className="hidden md:flex items-center gap-8">
+            <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+              How It Works
+            </a>
             <a href="/recipes" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Recipes
             </a>
@@ -30,9 +33,6 @@ const Header = ({ isDark, toggleDarkMode }: HeaderProps) => {
             </a>
             <a href="/nutrients" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               Nutrients
-            </a>
-            <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-              How It Works
             </a>
             <a href="/household" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
               My Household
