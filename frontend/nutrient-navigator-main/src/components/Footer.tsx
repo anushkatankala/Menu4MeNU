@@ -44,6 +44,12 @@ const Footer = () => {
                 >
                   How It Works
                 </a>
+                <a
+                  href="/household"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                >
+                  My Household
+                </a>
               </div>
           </div>
 

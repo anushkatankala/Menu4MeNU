@@ -7,6 +7,7 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 
+
 const item = { hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0 } };
 
 type IndexProps = {
@@ -79,5 +80,7 @@ const Index = ({ isDark, toggleDarkMode }: IndexProps) => {
     </main>
   );
 };
+
+
 
 export default Index;

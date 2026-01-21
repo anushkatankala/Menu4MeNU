@@ -10,6 +10,7 @@ import Recipes from "./pages/Recipes";
 import NotFound from "./pages/NotFound";
 import Favourites from "./pages/Favorites";
 import Nutrients from "./pages/Nutrients";
+import Household from "./pages/Household";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,10 @@ const AppContent = ({
             setFavorites={setFavorites}
           />
         }
+      />
+      <Route
+        path="/household"
+        element={<Household isDark={isDark} toggleDarkMode={toggleDarkMode} />}
       />
       <Route
         path="/nutrients"
