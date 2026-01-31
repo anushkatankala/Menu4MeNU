@@ -45,15 +45,6 @@ const Index = ({ isDark, toggleDarkMode }: IndexProps) => {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
-          <NutrientSelector />
-        </motion.div>
-
-        <motion.div
-          variants={item}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.2 }}
-        >
           <HowItWorks />
         </motion.div>
 
@@ -64,6 +55,15 @@ const Index = ({ isDark, toggleDarkMode }: IndexProps) => {
           viewport={{ once: true, amount: 0.2 }}
         >
           <FeaturesSection />
+        </motion.div>
+
+        <motion.div
+          variants={item}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          <NutrientSelector />
         </motion.div>
 
         <motion.div
