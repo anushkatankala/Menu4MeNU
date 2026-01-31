@@ -10,6 +10,7 @@ import Recipes from "./pages/Recipes";
 import NotFound from "./pages/NotFound";
 import Favourites from "./pages/Favorites";
 import Nutrients from "./pages/Nutrients";
+import RecipeDetails from "./pages/RecipeDetails";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,7 @@ const AppContent = ({
         path="/nutrients"
         element={<Nutrients isDark={isDark} toggleDarkMode={toggleDarkMode} />}
       />
+      <Route path="/recipes/:id" element={<RecipeDetails />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

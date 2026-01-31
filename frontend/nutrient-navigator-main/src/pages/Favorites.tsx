@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Search, Clock, Users, Flame, Filter, ChevronDown, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Clock, Users, Flame, Filter, ChevronDown } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import RecipeCard from "@/components/RecipeCard";
 
 interface FavouritesProps {
   isDark: boolean;
@@ -12,7 +13,6 @@ interface FavouritesProps {
   favorites: number[];
   setFavorites: React.Dispatch<React.SetStateAction<number[]>>;
 }
-
 
 interface Recipe {
   id: number;
@@ -47,6 +47,17 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
+  const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([]);
+
+  useEffect(() => {
+    // Load favorite recipes from localStorage
+    const storedFavorites = localStorage.getItem("favorites");
+    if (storedFavorites) {
+      const favoriteIds = JSON.parse(storedFavorites);
+      const filteredRecipes = recipes.filter((recipe) => favoriteIds.includes(recipe.id));
+      setFavoriteRecipes(filteredRecipes);
+    }
+  }, []);
 
   // filter to only favorited recipes
   const filteredFavorites = recipes
@@ -58,6 +69,23 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
       const matchesCategory = selectedCategory === "All" || recipe.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
+
+  const handleToggleFavorite = (id: number) => {
+    if (favorites.includes(id)) {
+      const updatedFavorites = favorites.filter((favId) => favId !== id);
+      setFavorites(updatedFavorites);
+      localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+      setFavoriteRecipes(favoriteRecipes.filter((recipe) => recipe.id !== id));
+    } else {
+      const updatedFavorites = [...favorites, id];
+      setFavorites(updatedFavorites);
+      localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+      const addedRecipe = recipes.find((recipe) => recipe.id === id);
+      if (addedRecipe) {
+        setFavoriteRecipes([...favoriteRecipes, addedRecipe]);
+      }
+    }
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -117,44 +145,13 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
         <section className="py-12 sm:py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredFavorites.map((recipe, index) => (
-                <article
+              {favoriteRecipes.map((recipe) => (
+                <RecipeCard
                   key={recipe.id}
-                  className="group glass-card overflow-hidden hover:shadow-card transition-all duration-300 animate-fade-up cursor-pointer"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <Badge className="absolute top-3 left-3 bg-background/90 text-foreground backdrop-blur-sm">{recipe.category}</Badge>
-                    <Heart
-                      className="w-6 h-6 absolute top-3 right-3 cursor-pointer transition-colors"
-                      stroke={favorites.includes(recipe.id) ? "pink" : "white"} // outline color
-                      fill={favorites.includes(recipe.id) ? "pink" : "none"}    // fill when favorited
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (favorites.includes(recipe.id)) {
-                          setFavorites(favorites.filter((id) => id !== recipe.id));
-                        } else {
-                          setFavorites([...favorites, recipe.id]);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-display text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">{recipe.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{recipe.description}</p>
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {recipe.nutrients.slice(0, 3).map((nutrient) => (
-                        <span key={nutrient} className="text-xs px-2 py-1 rounded-full bg-mint text-forest font-medium">{nutrient}</span>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground pt-4 border-t border-border">
-                      <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{recipe.prepTime}</div>
-                      <div className="flex items-center gap-1.5"><Users className="w-4 h-4" />{recipe.servings}</div>
-                      <div className="flex items-center gap-1.5"><Flame className="w-4 h-4" />{recipe.calories} cal</div>
-                    </div>
-                  </div>
-                </article>
+                  recipe={recipe}
+                  isFavorite={favorites.includes(recipe.id)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
               ))}
             </div>
 
