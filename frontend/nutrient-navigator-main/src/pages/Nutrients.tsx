@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 interface NutrientsProps {
   isDark: boolean;
@@ -45,71 +44,6 @@ const NUTRIENT_KEYWORDS: Record<string, string> = {
   sugar: "Simple carbohydrates that provide quick energy.",
 };
 
-type Recipe = {
-  id: string;
-  title: string;
-  ingredients: string[];
-  meal: string;
-  link: string;
-};
-
-const STOCK_RECIPES: Recipe[] = [
-  {
-    id: "1",
-    title: "Egg Fried Rice",
-    ingredients: ["Eggs", "Rice", "Soy Sauce", "Green Onion"],
-    meal: "Lunch/Dinner",
-    link: "https://www.allrecipes.com/recipe/23298/egg-fried-rice/",
-  },
-  {
-    id: "2",
-    title: "Pasta Primavera",
-    ingredients: ["Pasta", "Tomato", "Garlic", "Olive Oil"],
-    meal: "Lunch/Dinner",
-    link: "https://www.allrecipes.com/recipe/282286/easy-veggie-pasta-primavera/",
-  },
-  {
-    id: "3",
-    title: "Chicken Stir Fry",
-    ingredients: ["Chicken", "Bell Pepper", "Onion", "Soy Sauce"],
-    meal: "Lunch/Dinner",
-    link: "https://www.momontimeout.com/easy-chicken-stir-fry-recipe/"
-  },
-  {
-    id: "4",
-    title: "Burger Bowls",
-    ingredients: ["Beef", "Burger Seasoning", "Lettuce", "Tomato", "Pickle", "Fries", "Butter", "Ranch", "Mayonnaise", "Ketchup", "Horseradish", "Paprika", "Garlic"],
-    meal: "Lunch/Dinner",
-    link: "https://pinchofyum.com/burger-bowls-with-house-sauce-and-ranch-fries",
-  },
-  {
-    id: "5",
-    title: "Mackerel and Leek Hash",
-    ingredients: ["Potato", "Olive Oil", "Leek", "Mackerel", "Egg", "Horseradish"],
-    meal: "Lunch/Dinner",
-    link: "https://www.bbcgoodfood.com/recipes/smoked-mackerel-leek-hash-horseradish",
-  },
-];
-
-function matchRecipes(userIngredients: string[]) {
-  const owned = userIngredients.map(i => i.toLowerCase());
-
-  return STOCK_RECIPES.map(recipe => {
-    const required = recipe.ingredients.map(i => i.toLowerCase());
-    const matched = required.filter(i => owned.includes(i));
-    const missing = required.filter(i => !owned.includes(i));
-
-    return {
-      ...recipe,
-      matchPercent: Math.round((matched.length / required.length) * 100),
-      missing,
-      canCookNow: missing.length === 0,
-    };
-  })
-  .filter(r => r.matchPercent > 0)
-  .sort((a, b) => b.matchPercent - a.matchPercent);
-}
-
 
 export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
   const [query, setQuery] = useState("");
@@ -117,9 +51,6 @@ export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
   const [calories, setCalories] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [ingredientInput, setIngredientInput] = useState("");
-  const [userIngredients, setUserIngredients] = useState<string[]>([]);
-
   const handleSearch = async () => {
     if (!query.trim()) return;
     setLoading(true);
@@ -228,7 +159,7 @@ export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
           </section>
 
           {/* Nutrients Grid */}
-          <section className="snap-start flex flex-col justify-center">
+          <section className="flex flex-col justify-center items-center py-16 snap-start flex-grow">
             <div className="container mx-auto px-4">
               {calories !== null && (
                 <div className="group glass-card p-6 rounded-xl shadow mb-6 max-w-sm mx-auto animate-fade-up">
@@ -254,105 +185,7 @@ export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
               </div>
             </div>
           </section>
-          {/* =============================== */}
-          {/* INGREDIENT → RECIPE MATCHING */}
-          {/* =============================== */}
-          <section className="h-screen snap-start flex flex-col justify-center bg-muted/40">
-            <div className="container mx-auto px-4 max-w-4xl">
-              <h2 className="font-display text-3xl font-bold text-center mb-4">
-                Cook With What You Have
-              </h2>
-              <p className="text-center text-muted-foreground mb-8">
-                Enter ingredients you already have, and we’ll suggest recipes.
-              </p>
-
-              {/* Ingredient Input */}
-              <div className="flex gap-2 mb-6">
-                <Input
-                  placeholder="Add ingredient (e.g. eggs)"
-                  value={ingredientInput}
-                  onChange={(e) => setIngredientInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && ingredientInput.trim()) {
-                      setUserIngredients([...userIngredients, ingredientInput.trim()]);
-                      setIngredientInput("");
-                    }
-                  }}
-                />
-                <Button
-                  onClick={() => {
-                    if (!ingredientInput.trim()) return;
-                    setUserIngredients([...userIngredients, ingredientInput.trim()]);
-                    setIngredientInput("");
-                  }}
-                >
-                  Add
-                </Button>
-              </div>
-
-              {/* Ingredient Badges */}
-              <div className="flex flex-wrap gap-2 mb-8">
-                {userIngredients.map((ing, i) => (
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() =>
-                      setUserIngredients(userIngredients.filter((_, idx) => idx !== i))
-                    }
-                  >
-                    {ing} ✕
-                  </Badge>
-                ))}
-              </div>
-
-              {/* Recipe Matches */}
-              <div className="space-y-4">
-                {matchRecipes(userIngredients).map(recipe => (
-                  <div
-                    key={recipe.id}
-                    className="bg-card rounded-xl p-6 shadow-sm flex flex-col gap-3"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-semibold text-lg">{recipe.title}</h3>
-                        <p className="text-sm text-muted-foreground">{recipe.meal}</p>
-                      </div>
-                      <Badge variant={recipe.canCookNow ? "default" : "outline"}>
-                        {recipe.matchPercent}% match
-                      </Badge>
-                    </div>
-
-                    {!recipe.canCookNow && (
-                      <p className="text-sm text-muted-foreground">
-                        Missing: {recipe.missing.join(", ")}
-                      </p>
-                    )}
-
-                    {recipe.canCookNow && (
-                      <p className="text-sm text-green-600">
-                        ✅ You can cook this now
-                      </p>
-                    )}
-
-                    {/*Make now button*/}
-                    <a href = {recipe.link}>
-                      <Button className = "mt-2 w-fit" disabled={!recipe.canCookNow}>
-                        Make Now!
-                      </Button>
-                    </a>
-                  </div>
-                ))}
-
-                {userIngredients.length > 0 &&
-                  matchRecipes(userIngredients).length === 0 && (
-                    <p className="text-center text-muted-foreground">
-                      No matching recipes found.
-                    </p>
-                  )}
-              </div>
-            </div>
-          </section>
+          
         </div>
       <Footer />
     </main>
