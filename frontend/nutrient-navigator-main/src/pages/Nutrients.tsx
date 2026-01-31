@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 interface NutrientsProps {
   isDark: boolean;
@@ -45,13 +44,13 @@ const NUTRIENT_KEYWORDS: Record<string, string> = {
   sugar: "Simple carbohydrates that provide quick energy.",
 };
 
+
 export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
   const [query, setQuery] = useState("");
   const [nutrients, setNutrients] = useState<Nutrient[]>([]);
   const [calories, setCalories] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const handleSearch = async () => {
     if (!query.trim()) return;
     setLoading(true);
@@ -122,13 +121,13 @@ export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
 
   return (
 
-      <main className="min-h-screen bg-background">
+      <main className="h-screen overflow-y-scroll snap-y snap-mandatory bg-background">
         <div id="tts-content">
           <Header isDark={isDark} toggleDarkMode={toggleDarkMode} />
 
           {/* Hero */}
-          <section className="pt-28 pb-12 sm:pt-32 sm:pb-16 gradient-hero">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <section className="h-screen snap-start flex flex-col justify-center gradient-hero">
+            <div className="max-w-7xl mx-auto px-4 text-center">
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4 animate-fade-up">
                 Find Nutrients in Foods
               </h1>
@@ -160,8 +159,8 @@ export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
           </section>
 
           {/* Nutrients Grid */}
-          <section className="py-12 sm:py-16">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="flex flex-col justify-center items-center py-16 snap-start flex-grow">
+            <div className="container mx-auto px-4">
               {calories !== null && (
                 <div className="group glass-card p-6 rounded-xl shadow mb-6 max-w-sm mx-auto animate-fade-up">
                   <h3 className="font-semibold text-xl mb-2">Calories</h3>
@@ -186,8 +185,9 @@ export default function Nutrients({ isDark, toggleDarkMode }: NutrientsProps) {
               </div>
             </div>
           </section>
+          
         </div>
-        <Footer />
-      </main>
+      <Footer />
+    </main>
   );
 }

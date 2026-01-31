@@ -4,7 +4,7 @@ const features = [
   {
     icon: Brain,
     title: "Smart Recommendations",
-    description: "AI-powered suggestions based on your unique nutritional needs and preferences.",
+    description: "Suggestions based on your unique nutritional needs and preferences.",
   },
   {
     icon: Leaf,
