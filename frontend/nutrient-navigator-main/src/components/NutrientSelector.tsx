@@ -74,9 +74,14 @@ const NutrientSelector = () => {
                   className="w-full h-14 pl-12 pr-4 rounded-full bg-background border-2 border-border focus:border-primary focus:outline-none transition-colors text-foreground placeholder:text-muted-foreground"
                 />
               </div>
-              <button className="px-4 py-2 rounded-full bg-accent text-foreground hover:bg-secondary/80 transition-all">
+              <a
+                href="/recipes"
+                className="px-4 py-2 rounded-full bg-accent text-foreground hover:bg-secondary/80 transition-all mx-auto"
+                style={{ paddingTop: '14px' }}
+              >
                 Get Recommendations
-              </button>
+              </a>
+
 
             </div>
 
