@@ -224,6 +224,58 @@ function matchRecipes(userIngredients: string[]) {
 
   return (
     <>
+        <Header isDark={isDark} toggleDarkMode={toggleDarkMode} />
+        <div className="min-h-screen bg-background mt-20 py-8 md:py-12 relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+            {/* Header */}
+            <div className="max-w-2xl mx-auto text-center mb-10">
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Shared Households
+            </h1>
+            <p className="font-body text-muted-foreground">
+                Track shared ingredients, reduce duplicate purchases, and cut food waste together.
+            </p>
+            </div>
+
+            {/* Members */}
+            <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-card rounded-xl p-4 shadow-card">
+                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-sage" />
+                    <span className="font-display text-sm font-semibold text-foreground">Household Members</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {members.map((member) => (
+                    <div
+                        key={member.id}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full"
+                        title={member.name}
+                    >
+                        <span>{member.avatar}</span>
+                        <span className="font-body text-sm text-foreground">{member.name}</span>
+                    </div>
+                    ))}
+                    <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Invite
+                    </Button>
+                </div>
+                </div>
+            </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto grid lg:grid-cols-3 gap-8">
+            {/* Inventory */}
+            <div className="lg:col-span-2 space-y-6">
+                <div className="bg-card rounded-xl p-6 shadow-card">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-sage" />
+                    <h2 className="font-display text-lg font-semibold text-foreground">
+                        Household Inventory
+                    </h2>
+                    </div>
       <Header isDark={isDark} toggleDarkMode={toggleDarkMode} />
 
       <div className="min-h-screen bg-background mt-20 py-8 md:py-12 relative overflow-hidden">
@@ -297,262 +349,270 @@ function matchRecipes(userIngredients: string[]) {
                     value={newQuantity}
                     onChange={(e) => setNewQuantity(e.target.value)}
                     className="w-24"
-                  />
-                  <Button onClick={addItem} size="icon">
+                    />
+                    <Button onClick={addItem} variant="default" size="icon">
                     <Plus className="h-4 w-4" />
-                  </Button>
+                    </Button>
+                </div>
+
+                {/* Category Filter */}
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    {categories.map((category) => (
+                    <button
+                        key={category}
+                        onClick={() => setSelectedCategory(category)}
+                        className={cn(
+                        "px-3 py-1 rounded-full font-body text-xs whitespace-nowrap transition-all duration-300",
+                        selectedCategory === category
+                            ? "bg-sage text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-sage/20"
+                        )}
+                    >
+                        {category}
+                    </button>
+                    ))}
                 </div>
 
                 {/* Inventory List */}
                 <div className="space-y-2">
-                  {filteredInventory.map((item) => (
+                    {filteredInventory.map((item) => (
                     <div
-                      key={item.id}
-                      className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
+                        key={item.id}
+                        className={cn(
+                        "flex items-center justify-between p-3 rounded-lg border transition-all duration-300 group",
+                        item.expiresIn && item.expiresIn <= 2
+                            ? "bg-calm-red/10 border-calm-red/30"
+                            : "bg-muted/30 border-border hover:border-sage/30"
+                        )}
                     >
-                      <div>
-                        <p className="text-sm font-medium">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.quantity} • Added by {item.addedBy}
-                        </p>
-                      </div>
-                      <button onClick={() => removeItem(item.id)}>
-                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-calm-red" />
-                      </button>
+                        <div className="flex items-center gap-3">
+                        <div>
+                            <p className="font-body text-sm font-medium text-foreground flex items-center gap-2">
+                            {item.name}
+                            {item.expiresIn && item.expiresIn <= 2 && (
+                                <AlertTriangle className="h-3 w-3 text-calm-red" />
+                            )}
+                            </p>
+                            <p className="font-body text-xs text-muted-foreground">
+                            {item.quantity} • Added by {item.addedBy}
+                            {item.expiresIn && (
+                                <span className={cn(
+                                "ml-2",
+                                item.expiresIn <= 2 ? "text-calm-red" : ""
+                                )}>
+                                • Expires in {item.expiresIn} days
+                                </span>
+                            )}
+                            </p>
+                        </div>
+                        </div>
+                        <button
+                        onClick={() => removeItem(item.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-calm-red transition-all"
+                        >
+                        <Trash2 className="h-4 w-4" />
+                        </button>
                     </div>
-                  ))}
+                    ))}
                 </div>
-              </div>
+                </div>
             </div>
 
-            {/* RIGHT COLUMN */}
-            <div className="lg:col-span-1 space-y-6">
-
-              {/* Shopping List */}
-              <div className="bg-card rounded-xl p-6 shadow-card sticky top-24">
+            {/* Needed Items */}
+            <div className="lg:col-span-1">
+                <div className="bg-card rounded-xl p-6 shadow-card sticky top-24">
                 <div className="flex items-center gap-2 mb-4">
-                  <AlertTriangle className="h-5 w-5 text-calm-red" />
-                  <h2 className="font-display text-lg font-semibold">
+                    <AlertTriangle className="h-5 w-5 text-calm-red" />
+                    <h2 className="font-display text-lg font-semibold text-foreground">
                     Shopping List
-                  </h2>
+                    </h2>
                 </div>
 
                 <div className="flex gap-2 mb-4">
-                  <Input
+                    <Input
                     placeholder="Add item..."
                     value={newNeeded}
                     onChange={(e) => setNewNeeded(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addNeededItem()}
+                    onKeyPress={(e) => e.key === "Enter" && addNeededItem()}
                     className="flex-1"
-                  />
-                  <Button onClick={addNeededItem} size="icon">
+                    />
+                    <Button onClick={addNeededItem} variant="outline" size="icon">
                     <Plus className="h-4 w-4" />
-                  </Button>
+                    </Button>
                 </div>
 
                 <div className="space-y-2">
-                  {neededItems.map((item) => (
+                    {neededItems.map((item) => (
                     <div
-                      key={item}
-                      className="flex items-center justify-between p-3 bg-calm-red/10 rounded-lg border"
+                        key={item}
+                        className="flex items-center justify-between p-3 bg-calm-red/10 rounded-lg border border-calm-red/20 group"
                     >
-                      <span className="text-sm">{item}</span>
-                      <div className="flex gap-1">
-                        <button onClick={() => moveToInventory(item)}>
-                          <Check className="h-4 w-4 text-sage" />
+                        <span className="font-body text-sm text-foreground">{item}</span>
+                        <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => moveToInventory(item)}
+                            className="p-1 text-sage hover:bg-sage/20 rounded transition-all"
+                            title="Mark as bought"
+                        >
+                            <Check className="h-4 w-4" />
                         </button>
-                        <button onClick={() => removeNeededItem(item)}>
-                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                        <button
+                            onClick={() => removeNeededItem(item)}
+                            className="p-1 text-muted-foreground hover:text-calm-red transition-all"
+                        >
+                            <Trash2 className="h-4 w-4" />
                         </button>
-                      </div>
+                        </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* PRICE SEARCH */}
-              <div className="bg-card rounded-xl p-6 shadow-card">
-                <h2 className="font-display text-lg font-semibold mb-4">
-                  Compare Prices
-                </h2>
-
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    placeholder="Search ingredient..."
-                    value={priceSearchQuery}
-                    onChange={(e) => setPriceSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handlePriceSearch()}
-                    className="flex-1"
-                  />
-                  <Button onClick={handlePriceSearch}>
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {hasPriceSearched && priceSearchResults.length > 0 && (
-                  <div className="space-y-3">
-                    {priceSearchResults.map((result, index) => (
-                      <div
-                        key={result.store}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
-                      >
-                        <div>
-                          <p className="font-medium">
-                            {result.store}
-                          </p>
-                          {result.distance && (
-                            <p className="text-xs text-muted-foreground">
-                              {result.distance}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="text-right">
-                          <p className="font-semibold">
-                            ${result.price.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            /{result.unit}
-                          </p>
-                        </div>
-                      </div>
                     ))}
-                  </div>
+                </div>
+
+                {neededItems.length > 0 && (
+                    <p className="font-body text-xs text-muted-foreground mt-4">
+                    Click ✓ to mark as bought and add to inventory
+                    </p>
                 )}
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+        {/* =============================== */}
+          {/* INGREDIENT → RECIPE MATCHING */}
+          {/* =============================== */}
+          <section className="h-screen snap-start flex flex-col justify-center bg-muted/40">
+            <div className="container mx-auto px-4 max-w-4xl">
+              <h2 className="font-display text-3xl font-bold text-center mb-4">
+                Cook With What You Have
+              </h2>
+              <p className="text-center text-muted-foreground mb-8">
+                Enter ingredients you already have, and we’ll suggest recipes.
+              </p>
+
+              {/* Ingredient Input */}
+              <div className="flex gap-2 mb-6">
+                <Input
+                  placeholder="Add ingredient (e.g. eggs)"
+                  value={ingredientInput}
+                  onChange={(e) => setIngredientInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && ingredientInput.trim()) {
+                      setUserIngredients([...userIngredients, ingredientInput.trim()]);
+                      setIngredientInput("");
+                    }
+                  }}
+                />
+                <Button
+                  onClick={() => {
+                    if (!ingredientInput.trim()) return;
+                    setUserIngredients([...userIngredients, ingredientInput.trim()]);
+                    setIngredientInput("");
+                  }}
+                >
+                  Add
+                </Button>
               </div>
 
+              {/* Ingredient Badges */}
+              <div className="flex flex-wrap gap-2 mb-8">
+                {userIngredients.map((ing, i) => (
+                  <Badge
+                    key={i}
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setUserIngredients(userIngredients.filter((_, idx) => idx !== i))
+                    }
+                  >
+                    {ing} ✕
+                  </Badge>
+                ))}
+              </div>
+
+              {/* Recipe Matches */}
+              <div className="space-y-4">
+                {matchRecipes(userIngredients).map(recipe => (
+                  <div
+                    key={recipe.id}
+                    className="bg-card rounded-xl p-6 shadow-sm flex flex-col gap-3"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold text-lg">{recipe.title}</h3>
+                        <p className="text-sm text-muted-foreground">{recipe.meal}</p>
+                      </div>
+                      <Badge variant={recipe.canCookNow ? "default" : "outline"}>
+                        {recipe.matchPercent}% match
+                      </Badge>
+                    </div>
+
+                    {!recipe.canCookNow && (
+                      <p className="text-sm text-muted-foreground">
+                        Missing: {recipe.missing.join(", ")}
+                      </p>
+                    )}
+
+                    {recipe.canCookNow && (
+                      <p className="text-sm text-green-600">
+                        ✅ You can cook this now
+                      </p>
+                    )}
+
+                    {/*Make now button*/}
+                    <a href = {recipe.link}>
+                      <Button className = "mt-2 w-fit" disabled={!recipe.canCookNow}>
+                        Make Now!
+                      </Button>
+                    </a>
+                  </div>
+                ))}
+
+                {userIngredients.length > 0 &&
+                  matchRecipes(userIngredients).length === 0 && (
+                    <p className="text-center text-muted-foreground">
+                      No matching recipes found.
+                    </p>
+                  )}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </section>
+        <Footer/>
+        <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Invite Household Member</DialogTitle>
+                    <DialogDescription>
+                        Enter the email address of the person you want to invite.
+                    </DialogDescription>
+                </DialogHeader>
 
-      {/* =============================== */} {/* INGREDIENT → RECIPE MATCHING */} {/* =============================== */} 
-      <section className="h-screen snap-start flex flex-col justify-center bg-muted/40"> 
-        <div className="container mx-auto px-4 max-w-4xl"> 
-          <h2 className="font-display text-3xl font-bold text-center mb-4"> 
-            Cook With What You Have 
-          </h2> 
-          <p className="text-center text-muted-foreground mb-8"> 
-            Enter ingredients you already have, and we’ll suggest recipes. 
-          </p> 
-          {/* Ingredient Input */} 
-          <div className="flex gap-2 mb-6"> 
-            <Input 
-              placeholder="Add ingredient (e.g. eggs)" 
-              value={ingredientInput} 
-              onChange={(e) => setIngredientInput(e.target.value)} 
-              onKeyDown={(e) => { 
-                if (e.key === "Enter" && ingredientInput.trim()) { 
-                  setUserIngredients([...userIngredients, ingredientInput.trim()]); 
-                  setIngredientInput(""); 
-                } 
-              }} 
-            /> 
-            <Button 
-            onClick={() => { 
-              if (!ingredientInput.trim()) return; 
-              setUserIngredients([...userIngredients, ingredientInput.trim()]); 
-              setIngredientInput(""); 
-            }} 
-          > 
-            Add 
-          </Button> 
-        </div> 
-        
-        {/* Ingredient Badges */} 
-        <div className="flex flex-wrap gap-2 mb-8"> 
-          {userIngredients.map((ing, i) => ( 
-            <Badge 
-              key={i} 
-              variant="secondary" 
-              className="cursor-pointer" 
-              onClick={() => 
-                setUserIngredients(userIngredients.filter((_, idx) => idx !== i)) 
-              } 
-            > 
-              {ing} ✕ 
-            </Badge> 
-          ))} 
-        </div> 
-        
-        {/* Recipe Matches */} 
-        <div className="space-y-4"> 
-          {matchRecipes(userIngredients).map(recipe => ( 
-            <div 
-              key={recipe.id} 
-              className="bg-card rounded-xl p-6 shadow-sm flex flex-col gap-3" 
-            > 
-              <div className="flex justify-between items-center"> 
-                <div> 
-                  <h3 className="font-semibold text-lg">{recipe.title}</h3> 
-                  <p className="text-sm text-muted-foreground">{recipe.meal}</p> 
-                </div> 
-                <Badge variant={recipe.canCookNow ? "default" : "outline"}> 
-                  {recipe.matchPercent}% match 
-                </Badge> 
-              </div> 
-              {!recipe.canCookNow && ( 
-                <p className="text-sm text-muted-foreground"> 
-                  Missing: {recipe.missing.join(", ")} 
-                </p> 
-              )} 
-              {recipe.canCookNow && ( 
-                <p className="text-sm text-green-600"> 
-                  ✅ You can cook this now 
-                </p>
-              )} 
-              
-              {/*Make now button*/} 
-              <a href = {recipe.link}> 
-                <Button className = "mt-2 w-fit" disabled={!recipe.canCookNow}> 
-                  Make Now! 
-                </Button> 
-              </a> 
-            </div> 
-          ))} 
-          {userIngredients.length > 0 && 
-            matchRecipes(userIngredients).length === 0 && ( 
-              <p className="text-center text-muted-foreground"> 
-                No matching recipes found. 
-              </p> 
-            )} 
-          </div> 
-        </div> 
-      </section>
-      <Footer />
+                <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                />
 
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite Household Member</DialogTitle>
-            <DialogDescription>
-              Enter the email address of the person you want to invite.
-            </DialogDescription>
-          </DialogHeader>
-
-          <Input
-            type="email"
-            placeholder="email@example.com"
-            value={inviteEmail}
-            onChange={(e) => setInviteEmail(e.target.value)}
-          />
-
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setInviteOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setInviteEmail("");
-                setInviteOpen(false);
-              }}
-              disabled={!inviteEmail}
-            >
-              Send Invite
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                <DialogFooter className="mt-4">
+                    <Button
+                        variant="outline"
+                        onClick={() => setInviteOpen(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            console.log("Invite sent to:", inviteEmail);
+                            setInviteEmail("");
+                            setInviteOpen(false);
+                        }}
+                        disabled={!inviteEmail}
+                    >
+                        Send Invite
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </>
   );
 };
