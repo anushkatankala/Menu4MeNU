@@ -160,25 +160,30 @@ const Recipes = ({ isDark, toggleDarkMode, favorites, setFavorites }: RecipesPro
                   <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
                 </Button>
               </div>
-
-              {showFilters && (
-                <div className="mt-4 flex flex-wrap gap-2 justify-center animate-fade-in">
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
-                        selectedCategory === category
-                          ? "bg-primary text-primary-foreground shadow-soft"
-                          : "bg-card border border-border text-foreground hover:border-primary"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="h-12 px-6 rounded-full gap-2">
+                <Filter className="w-4 h-4" />
+                Filter
+                <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+              </Button>
             </div>
+
+            {showFilters && (
+              <div className="mt-4 flex flex-wrap gap-2 justify-center animate-fade-in">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
+                      selectedCategory === category
+                        ? "bg-primary text-primary-foreground shadow-soft"
+                        : "bg-card border border-border text-foreground hover:border-primary"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

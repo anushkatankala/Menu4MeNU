@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Users, Plus, Package, AlertTriangle, Check, Trash2, Edit2 } from "lucide-react";
+import { Search, ShoppingCart, MapPin, TrendingDown, ExternalLink, Users, Plus, Package, AlertTriangle, Check, Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
+import { FoodIllustration } from "@/components/FoodIllustration";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,16 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { S } from "node_modules/framer-motion/dist/types.d-DagZKalS";
 
+interface PriceResult {
+  store: string;
+  price: number;
+  unit: string
+  distance?: string;
+  savings?: number;
+  logo: string;
+}
 
 interface Householdprops {
   isDark: boolean;
@@ -35,6 +45,20 @@ interface InventoryItem {
   expiresIn?: number;
   category: string;
 }
+
+const samplePrices: Record<string, PriceResult[]> = {
+  "tomatoes": [
+    { store: "Farmboy", price: 2.99, unit: "kg", distance: "0.8 km", savings: 0.50, logo: "🏪" },
+    { store: "FreshCo", price: 3.49, unit: "kg", distance: "1.2 km", logo: "🥬" },
+    { store: "Metro", price: 3.29, unit: "kg", distance: "0.5 km", logo: "🛒" },
+    { store: "Costco", price: 4.99, unit: "3 kg bag", distance: "2.5 km", savings: 1.00, logo: "📦" },
+  ],
+  "olive oil": [
+    { store: "Costco", price: 12.99, unit: "1L", distance: "2.5 mi", savings: 4.00, logo: "📦" },
+    { store: "Farmboy", price: 6.99, unit: "500ml", distance: "0.8 mi", logo: "🏪" },
+    { store: "FreshCo", price: 14.99, unit: "750ml", distance: "1.2 mi", logo: "🥬" },
+  ]
+};
 
 const members: HouseholdMember[] = [
   { id: "1", name: "You", avatar: "👤" },
@@ -66,6 +90,23 @@ const Household = ({isDark, toggleDarkMode}: Householdprops) => {
     const [inviteEmail, setInviteEmail] = useState("");
     const [ingredientInput, setIngredientInput] = useState("");
     const [userIngredients, setUserIngredients] = useState<string[]>([]);
+    const [priceSearchQuery, setPriceSearchQuery] = useState("");
+    const [priceSearchResults, setPriceSearchResults] = useState<PriceResult[]>([]);
+    const [hasPriceSearched, setHasPriceSearched] = useState(false);
+
+const handlePriceSearch = () => {
+  const query = priceSearchQuery.toLowerCase();
+  if (samplePrices[query]) {
+    setPriceSearchResults(samplePrices[query]);
+  } else {
+    setPriceSearchResults([
+      { store: "Local Market", price: 3.99, unit: "each", distance: "0.3 km", logo: "🏬" },
+      { store: "Grocery Outlet", price: 2.49, unit: "each", distance: "1.5 km", savings: 1.50, logo: "💰" },
+    ]);
+  }
+  setHasPriceSearched(true);
+};
+
 
 
   const filteredInventory = selectedCategory === "All"
@@ -235,17 +276,75 @@ function matchRecipes(userIngredients: string[]) {
                         Household Inventory
                     </h2>
                     </div>
+      <Header isDark={isDark} toggleDarkMode={toggleDarkMode} />
+
+      <div className="min-h-screen bg-background mt-20 py-8 md:py-12 relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+
+          {/* Header */}
+          <div className="max-w-2xl mx-auto text-center mb-10">
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Shared Households
+            </h1>
+            <p className="font-body text-muted-foreground">
+              Track shared ingredients, reduce duplicate purchases, and cut food waste together.
+            </p>
+          </div>
+
+          {/* Members */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-card rounded-xl p-4 shadow-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-sage" />
+                  <span className="font-display text-sm font-semibold text-foreground">
+                    Household Members
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full"
+                    >
+                      <span>{member.avatar}</span>
+                      <span className="font-body text-sm text-foreground">
+                        {member.name}
+                      </span>
+                    </div>
+                  ))}
+                  <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Invite
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* GRID */}
+          <div className="max-w-4xl mx-auto grid lg:grid-cols-3 gap-8">
+
+            {/* Inventory */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-card rounded-xl p-6 shadow-card">
+
+                <div className="flex items-center gap-2 mb-4">
+                  <Package className="h-5 w-5 text-sage" />
+                  <h2 className="font-display text-lg font-semibold text-foreground">
+                    Household Inventory
+                  </h2>
                 </div>
 
                 {/* Add Item */}
                 <div className="flex gap-2 mb-4">
-                    <Input
+                  <Input
                     placeholder="Item name..."
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                     className="flex-1"
-                    />
-                    <Input
+                  />
+                  <Input
                     placeholder="Qty"
                     value={newQuantity}
                     onChange={(e) => setNewQuantity(e.target.value)}
