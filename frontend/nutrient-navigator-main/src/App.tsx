@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Index from "./pages/Index";
 import Recipes from "./pages/Recipes";
+import RecipeDetail from "./pages/RecipeDetail"; // NEW IMPORT
 import NotFound from "./pages/NotFound";
 import Favourites from "./pages/Favorites";
 import Nutrients from "./pages/Nutrients";
@@ -88,6 +89,18 @@ const AppContent = ({
         path="/recipes"
         element={
           <Recipes
+            isDark={isDark}
+            toggleDarkMode={toggleDarkMode}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        }
+      />
+      {/* NEW ROUTE - Recipe Detail Page */}
+      <Route
+        path="/recipe/:id"
+        element={
+          <RecipeDetail
             isDark={isDark}
             toggleDarkMode={toggleDarkMode}
             favorites={favorites}

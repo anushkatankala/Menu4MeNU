@@ -1,136 +1,99 @@
 package FoodApplication.controller;
 
-import FoodApplication.model.Food;
-import FoodApplication.service.RecipesExcelService;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.io.ClassPathResource;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import FoodApplication.model.Food;
+import FoodApplication.repo.RecipesRepo;
+import FoodApplication.service.RecipesExcelService;
 
 @RestController
 @RequestMapping("/api/foods")
+@CrossOrigin(origins = "http://localhost:5173") // Adjust this to your frontend URL
 public class FoodController {
 
+    private final RecipesRepo recipesRepo;
     private final RecipesExcelService recipesExcelService;
 
-    public FoodController(RecipesExcelService recipesExcelService) {
+    public FoodController(RecipesRepo recipesRepo, RecipesExcelService recipesExcelService) {
+        this.recipesRepo = recipesRepo;
         this.recipesExcelService = recipesExcelService;
     }
 
     /**
      * GET /api/foods
-     * Reads recipes.xlsx from the resources folder and returns all rows as a list of Food objects.
+     * Fetches all foods from the PostgreSQL database
      */
     @GetMapping
+    @SuppressWarnings("CallToPrintStackTrace")
     public ResponseEntity<List<Food>> getAllFoods() {
-        List<Food> foods = new ArrayList<>();
-        String excelFileName = "recipes.xlsx";
-
-        try (InputStream is = new ClassPathResource(excelFileName).getInputStream();
-             Workbook workbook = new XSSFWorkbook(is)) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-
-            // Assume first row is header, so start from row 1
-            for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
-                if (row == null) continue;
-
-                String name = getCellStringValue(row.getCell(0));
-                String mainNutrition = getCellStringValue(row.getCell(1));
-                List<String> ingredients = parseCsvToList(getCellStringValue(row.getCell(2)));
-                List<String> recipes = parseCsvToList(getCellStringValue(row.getCell(3)));
-                List<String> recommendations = parseCsvToList(getCellStringValue(row.getCell(4)));
-                List<String> tags = parseCsvToList(getCellStringValue(row.getCell(5)));
-
-                Food food = new Food(
-                        name,
-                        mainNutrition,
-                        ingredients,
-                        recipes,
-                        recommendations,
-                        tags
-                );
-
-                foods.add(food);
-            }
-
+        try {
+            List<Food> foods = recipesRepo.findAll();
             return ResponseEntity.ok(foods);
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
 
     /**
-     * POST /api/foods/import
-     * Imports recipes.xlsx into PostgreSQL (creates table + inserts rows).
+     * GET /api/foods/{id}
+     * Fetches a single food by ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Food> getFoodById(@PathVariable Long id) {
+        return recipesRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * GET /api/foods/search?name=...
+     * Search foods by name (case-insensitive)
+     */
+    @GetMapping("/search")
+    @SuppressWarnings("CallToPrintStackTrace")
+    public ResponseEntity<List<Food>> searchFoodsByName(@RequestParam String name) {
+        try {
+            List<Food> foods = recipesRepo.findByNameContainingIgnoreCase(name);
+            return ResponseEntity.ok(foods);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * GET /api/foods/import
+     * Imports recipes.xlsx into PostgreSQL (for initial setup)
+     * This is kept from your original code in case you need it
      */
     @GetMapping("/import")
+    @SuppressWarnings("CallToPrintStackTrace")
     public ResponseEntity<String> importExcelToPostgres() {
-        recipesExcelService.importExcelToPostgres();
-        return ResponseEntity.ok("Imported recipes.xlsx into PostgreSQL");
+        try {
+            recipesExcelService.importExcelToPostgres();
+            return ResponseEntity.ok("Successfully imported recipes.xlsx into PostgreSQL");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body("Failed to import: " + e.getMessage());
+        }
     }
 
     /**
-     * Safely get a String from a cell (handles nulls and different cell types).
+     * GET /api/foods/health
+     * Simple health check endpoint
      */
-    private String getCellStringValue(Cell cell) {
-        if (cell == null) return "";
-
-        CellType type = cell.getCellType();
-
-        if (type == CellType.STRING) {
-            return cell.getStringCellValue().trim();
-        } else if (type == CellType.NUMERIC) {
-            // If you want integers without .0, you can adjust this later.
-            return String.valueOf(cell.getNumericCellValue());
-        } else if (type == CellType.BOOLEAN) {
-            return String.valueOf(cell.getBooleanCellValue());
-        } else if (type == CellType.FORMULA) {
-            // Try to read formula result as string, otherwise numeric
-            try {
-                return cell.getStringCellValue().trim();
-            } catch (IllegalStateException e) {
-                try {
-                    return String.valueOf(cell.getNumericCellValue());
-                } catch (IllegalStateException ex) {
-                    return "";
-                }
-            }
-        }
-
-        return "";
-    }
-
-    /**
-     * Parse a comma-separated string into a List<String>.
-     * Empty or null becomes an empty list.
-     */
-    private List<String> parseCsvToList(String csv) {
-        if (csv == null || csv.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        String[] parts = csv.split(",");
-        List<String> list = new ArrayList<>();
-        Arrays.stream(parts)
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .forEach(list::add);
-
-        return list;
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Food API is running!");
     }
 }
-
