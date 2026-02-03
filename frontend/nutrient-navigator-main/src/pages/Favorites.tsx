@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getAllFoods, Food as ApiFood } from "@/services/api";
-
+import { getCachedRecipeImage } from "@/services/imageService";
 
 interface FavouritesProps {
   isDark: boolean;
@@ -29,13 +29,6 @@ interface Recipe {
   url: string;
 }
 
-// Mock recipes as fallback
-const mockRecipes: Recipe[] = [
-  { id: 1, title: "Grilled Salmon with Quinoa", description: "Omega-3 rich salmon paired with protein-packed quinoa and seasonal vegetables.", image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop", prepTime: "25 min", servings: 2, calories: 450, nutrients: ["Protein", "Omega-3", "Iron"], category: "Dinner", url: "/recipe/1" },
-  { id: 2, title: "Spinach & Berry Smoothie Bowl", description: "Antioxidant-packed breakfast bowl with fresh berries and iron-rich spinach.", image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&h=300&fit=crop", prepTime: "10 min", servings: 1, calories: 320, nutrients: ["Vitamin C", "Iron", "Fiber"], category: "Breakfast", url: "/recipe/2"},
-  { id: 3, title: "Mediterranean Chickpea Salad", description: "Fiber-rich chickpeas with fresh vegetables and olive oil dressing.", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop", prepTime: "15 min", servings: 4, calories: 280, nutrients: ["Fiber", "Protein", "Vitamin A"], category: "Lunch",  url: "/recipe/3"},
-];
-
 const categories = ["All", "Breakfast", "Lunch", "Dinner", "Snack"];
 
 export default function Favourites({ isDark, toggleDarkMode, favorites, setFavorites }: FavouritesProps) {
@@ -46,58 +39,53 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [useApiData, setUseApiData] = useState(true);
 
-  // Fetch recipes from API on component mount
+  // Fetch recipes with cached images like in recipes.tsx
   useEffect(() => {
     const fetchRecipes = async () => {
-      if (!useApiData) {
-        setRecipes(mockRecipes);
-        setIsLoading(false);
-        return;
-      }
-
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const foods = await getAllFoods();
-        
-        // Transform API Food data to Recipe format
-        const transformedRecipes: Recipe[] = foods.map((food: ApiFood, index: number) => {
-          const recipeId = food.id || (index + 1);
-          
-          return {
-            id: recipeId,
-            title: food.name,
-            description: food.recommendations?.join(". ") || "Delicious and nutritious meal",
-            image: `https://images.unsplash.com/photo-${1467003909585 + index}?w=400&h=300&fit=crop`,
-            prepTime: "25 min",
-            servings: 2,
-            calories: 400,
-            nutrients: [food.mainNutrition, ...(food.tags || [])].filter(Boolean),
-            category: food.tags && food.tags.length > 0 ? 
-              (food.tags.includes("breakfast") ? "Breakfast" :
-               food.tags.includes("lunch") ? "Lunch" :
-               food.tags.includes("dinner") ? "Dinner" :
-               food.tags.includes("snack") ? "Snack" : "Dinner") : "Dinner",
-            url: `/recipe/${recipeId}`
-          };
-        });
+
+        const transformedRecipes: Recipe[] = await Promise.all(
+          foods.map(async (food: ApiFood, index: number) => {
+            const imageUrl = await getCachedRecipeImage(food.name, index);
+            return {
+              id: food.id,
+              title: food.name,
+              description: food.recommendations?.join(". ") || "Delicious and nutritious meal",
+              image: imageUrl,
+              prepTime: "25 min",
+              servings: 2,
+              calories: 400,
+              nutrients: [food.mainNutrition, ...(food.tags || [])].filter(Boolean),
+              category: food.tags && food.tags.length > 0
+                ? food.tags.includes("breakfast") ? "Breakfast"
+                : food.tags.includes("lunch") ? "Lunch"
+                : food.tags.includes("dinner") ? "Dinner"
+                : food.tags.includes("snack") ? "Snack"
+                : "Dinner"
+                : "Dinner",
+              url: `/recipe/${food.id}`,
+            };
+          })
+        );
 
         setRecipes(transformedRecipes);
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
-        setError("Failed to load recipes from the server.");
+        setError("Failed to load favorites from the server.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchRecipes();
-  }, [useApiData]);
+  }, []);
 
-  // Filter to only favorited recipes
+  // Filter only favorites + search + category
   const filteredFavorites = recipes
     .filter((recipe) => favorites.includes(recipe.id))
     .filter((recipe) => {
@@ -108,9 +96,7 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
       return matchesSearch && matchesCategory;
     });
 
-  const handleRecipeClick = (recipeId: number) => {
-    navigate(`/recipe/${recipeId}`);
-  };
+  const handleRecipeClick = (recipeId: number) => navigate(`/recipe/${recipeId}`);
 
   return (
     <main className="min-h-screen bg-background">
@@ -127,7 +113,6 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
               Quickly access all the meals you've marked as favorites
             </p>
 
-            {/* Error Message */}
             {error && (
               <div className="mt-4 max-w-2xl mx-auto p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-sm text-yellow-600 dark:text-yellow-400 text-center">{error}</p>
@@ -148,7 +133,8 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
                   />
                 </div>
                 <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="h-12 px-6 rounded-full gap-2">
-                  <Filter className="w-4 h-4" /> Filter <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+                  <Filter className="w-4 h-4" /> Filter
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
                 </Button>
               </div>
 
@@ -188,7 +174,6 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
         {!isLoading && (
           <section className="py-12 sm:py-16">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Show favorite count */}
               {filteredFavorites.length > 0 && (
                 <div className="mb-8">
                   <p className="text-muted-foreground">
@@ -205,11 +190,17 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
                     style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => handleRecipeClick(recipe.id)}
                   >
-                    <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={recipe.image} 
-                        alt={recipe.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    {/* Image */}
+                    <div className="relative h-48 overflow-hidden bg-accent">
+                      <img
+                        src={recipe.image}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://images.unsplash.com/photo-${1467003909585 + index}?w=400&h=300&fit=crop`;
+                        }}
                       />
                       <Badge className="absolute top-3 left-3 bg-background/90 text-foreground backdrop-blur-sm">
                         {recipe.category}
@@ -222,6 +213,7 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
                         fill={favorites.includes(recipe.id) ? "pink" : "none"}
                         onClick={(e) => {
                           e.stopPropagation();
+                          
                           if (favorites.includes(recipe.id)) {
                             setFavorites(favorites.filter((id) => id !== recipe.id));
                           } else {
@@ -230,6 +222,8 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
                         }}
                       />
                     </div>
+
+                    {/* Content */}
                     <div className="p-5">
                       <h3 className="font-display text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
                         {recipe.title}
@@ -257,25 +251,10 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
                   <div className="text-6xl mb-4">💔</div>
                   <h3 className="text-xl font-semibold text-foreground mb-2">No favorites yet</h3>
                   <p className="text-muted-foreground mb-6">
-                    {favorites.length === 0 
+                    {favorites.length === 0
                       ? "Start adding recipes to your favorites by clicking the heart icon!"
                       : "No favorite recipes match your search criteria."}
                   </p>
-                  {favorites.length > 0 ? (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => { 
-                        setSearchQuery(""); 
-                        setSelectedCategory("All"); 
-                      }}
-                    >
-                      Clear filters
-                    </Button>
-                  ) : (
-                    <Button onClick={() => navigate("/recipes")}>
-                      Browse Recipes
-                    </Button>
-                  )}
                 </div>
               )}
             </div>
