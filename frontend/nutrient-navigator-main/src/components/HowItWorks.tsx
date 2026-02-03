@@ -8,13 +8,13 @@ const steps = [
   },
   {
     icon: Sparkles,
-    title: "AI-Powered Matching",
+    title: "Algorithmic Matching",
     description: "Our smart algorithm analyzes thousands of meals to find the perfect nutrient-rich options for you.",
   },
   {
     icon: Utensils,
     title: "Enjoy Your Meals",
-    description: "Get personalized meal recommendations with recipes, nutrition facts, and preparation tips.",
+    description: "Get optimized meal recommendations with recipes, nutrition facts, and preparation tips.",
   },
 ];
 

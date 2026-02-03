@@ -3,33 +3,33 @@ import { Brain, Clock, Heart, Leaf, LineChart, Users } from "lucide-react";
 const features = [
   {
     icon: Brain,
-    title: "Smart Recommendations",
-    description: "Suggestions based on your unique nutritional needs and preferences.",
-  },
-  {
-    icon: Leaf,
-    title: "Fresh Ingredients",
-    description: "Focus on whole foods and seasonal ingredients for maximum nutrient absorption.",
-  },
-  {
-    icon: Clock,
-    title: "Quick & Easy",
-    description: "Filter by prep time to find meals that fit your busy schedule.",
-  },
-  {
-    icon: LineChart,
-    title: "Track Progress",
-    description: "Monitor your nutrient intake over time with detailed analytics.",
+    title: "Easy Recipe Discovery",
+    description: "Browse recipes with clear details and helpful filters to quickly find what you want to cook.",
   },
   {
     icon: Users,
-    title: "Community Recipes",
-    description: "Access thousands of user-submitted recipes with verified nutrition data.",
+    title: "Shared Household",
+    description: "Share a household space where members can view the current ingredients in their household.",
   },
   {
     icon: Heart,
-    title: "Health Goals",
-    description: "Set personalized health goals and get meals tailored to achieve them.",
+    title: "Favorites",
+    description: "Save your favorite recipes so they’re easy to find and revisit later.",
+  },
+  {
+    icon: Clock,
+    title: "Filter by Prep Time",
+    description: "Find meals that fit your schedule by filtering recipes based on preparation time.",
+  },
+  {
+    icon: Leaf,
+    title: "Ingredient Transparency",
+    description: "Every recipe includes a clear ingredient list so you always know what’s involved.",
+  },
+  {
+    icon: LineChart,
+    title: "Nutrient Search Bar",
+    description: "Quickly find recipes that match your dietary goals by searching for specific nutrients.",
   },
 ];
 

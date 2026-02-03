@@ -61,12 +61,6 @@ const Footer = () => {
                   href="/#footer"
                   className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                 >
-                  Daily Blog
-                </a>
-                <a
-                  href="/#footer"
-                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                >
                   About Us
                 </a>
               </div>
