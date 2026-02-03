@@ -4,12 +4,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AuthProvider } from "@/context/AuthProvider";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Recipes from "./pages/Recipes";
-import RecipeDetail from "./pages/RecipeDetail"; // NEW IMPORT
+import RecipeDetail from "./pages/RecipeDetail";
 import NotFound from "./pages/NotFound";
-import Favourites from "./pages/Favorites";
+import Favorites from "./pages/Favorites";
 import Nutrients from "./pages/Nutrients";
 import Household from "./pages/Household";
 
@@ -33,7 +35,7 @@ const ReadPageButton = () => {
     if (!text) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.25; // increase speed
+    utterance.rate = 1.25;
 
     utterance.onend = () => setReading(false);
 
@@ -43,7 +45,7 @@ const ReadPageButton = () => {
 
   return (
     <button
-      data-tts-ignore  // ignore this button when reading page
+      data-tts-ignore
       aria-hidden="true"   
       onClick={toggleReading}
       className={`
@@ -96,7 +98,7 @@ const AppContent = ({
           />
         }
       />
-      {/* NEW ROUTE - Recipe Detail Page */}
+      {/* Recipe Detail Page */}
       <Route
         path="/recipe/:id"
         element={
@@ -108,20 +110,27 @@ const AppContent = ({
           />
         }
       />
+      {/* Protected Routes */}
       <Route
         path="/favorites"
         element={
-          <Favourites
-            isDark={isDark}
-            toggleDarkMode={toggleDarkMode}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
+          <ProtectedRoute>
+            <Favorites
+              isDark={isDark}
+              toggleDarkMode={toggleDarkMode}
+              favorites={favorites}
+              setFavorites={setFavorites}
+            />
+          </ProtectedRoute>
         }
       />
       <Route
         path="/household"
-        element={<Household isDark={isDark} toggleDarkMode={toggleDarkMode} />}
+        element={
+          <ProtectedRoute>
+            <Household isDark={isDark} toggleDarkMode={toggleDarkMode} />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/nutrients"
@@ -131,7 +140,6 @@ const AppContent = ({
     </Routes>
   );
 };
-
 
 const App = () => {
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -161,19 +169,21 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ReadPageButton />
-          <AppContent
-            isDark={isDark}
-            toggleDarkMode={toggleDarkMode}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ReadPageButton />
+            <AppContent
+              isDark={isDark}
+              toggleDarkMode={toggleDarkMode}
+              favorites={favorites}
+              setFavorites={setFavorites}
+            />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
