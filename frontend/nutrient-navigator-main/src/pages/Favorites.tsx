@@ -6,8 +6,9 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { getAllFoods, Food as ApiFood } from "@/services/api";
+import { getAllFoods, Food as ApiFood, getUserFavorites } from "@/services/api";
 import { getCachedRecipeImage } from "@/services/imageService";
+import { useAuth } from "@/context/AuthContext"
 
 interface FavouritesProps {
   isDark: boolean;
@@ -27,6 +28,7 @@ interface Recipe {
   nutrients: string[];
   category: string;
   url: string;
+  isFavorite?: boolean;
 }
 
 const categories = ["All", "Breakfast", "Lunch", "Dinner", "Snack"];
@@ -39,19 +41,25 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth() // <- get Supabase user from AuthProvider
 
-  // Fetch recipes with cached images like in recipes.tsx
+
+  // Fetch recipes with cached images and user's favorites
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchRecipesAndFavorites = async () => {
+      if (!user) return // user not signed in yet
+
       try {
-        setIsLoading(true);
-        setError(null);
+        setIsLoading(true)
+        setError(null)
 
-        const foods = await getAllFoods();
+        // Fetch all recipes
+        const foods = await getAllFoods()
 
+        // Transform recipes and check if they are favorites
         const transformedRecipes: Recipe[] = await Promise.all(
           foods.map(async (food: ApiFood, index: number) => {
-            const imageUrl = await getCachedRecipeImage(food.name, index);
+            const imageUrl = await getCachedRecipeImage(food.name, index)
             return {
               id: food.id,
               title: food.name,
@@ -61,29 +69,27 @@ export default function Favourites({ isDark, toggleDarkMode, favorites, setFavor
               servings: 2,
               calories: 400,
               nutrients: [food.mainNutrition, ...(food.tags || [])].filter(Boolean),
-              category: food.tags && food.tags.length > 0
-                ? food.tags.includes("breakfast") ? "Breakfast"
-                : food.tags.includes("lunch") ? "Lunch"
-                : food.tags.includes("dinner") ? "Dinner"
-                : food.tags.includes("snack") ? "Snack"
-                : "Dinner"
-                : "Dinner",
+              category: food.tags?.includes("breakfast") ? "Breakfast"
+                       : food.tags?.includes("lunch") ? "Lunch"
+                       : food.tags?.includes("dinner") ? "Dinner"
+                       : food.tags?.includes("snack") ? "Snack"
+                       : "Dinner",
               url: `/recipe/${food.id}`,
-            };
+            }
           })
-        );
+        )
 
-        setRecipes(transformedRecipes);
+        setRecipes(transformedRecipes)
       } catch (err) {
-        console.error("Failed to fetch recipes:", err);
-        setError("Failed to load favorites from the server.");
+        console.error("Failed to fetch recipes:", err)
+        setError("Failed to load favorites from the server.")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchRecipes();
-  }, []);
+    fetchRecipesAndFavorites()
+  }, [user])
 
   // Filter only favorites + search + category
   const filteredFavorites = recipes
