@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getCachedRecipeImage } from "@/services/imageService";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -34,6 +35,7 @@ const RecipeDetail = ({ isDark, toggleDarkMode, favorites, setFavorites }: Recip
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -46,18 +48,23 @@ const RecipeDetail = ({ isDark, toggleDarkMode, favorites, setFavorites }: Recip
       try {
         setIsLoading(true);
         setError(null);
+
         const data = await getFoodById(parseInt(id));
         setRecipe(data);
+
+        // 🔥 SAME image logic as Recipes page
+        const image = await getCachedRecipeImage(data.name, data.id);
+        setImageUrl(image);
       } catch (err) {
         console.error("Failed to fetch recipe:", err);
-        setError("Failed to load recipe details. Please try again later.");
+        setError("Failed to load recipe details.");
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchRecipe();
   }, [id]);
+
 
   const toggleFavorite = () => {
     if (!recipe) return;
@@ -277,7 +284,7 @@ const RecipeDetail = ({ isDark, toggleDarkMode, favorites, setFavorites }: Recip
             <div className="max-w-5xl mx-auto">
               <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-card animate-fade-up">
                 <img
-                  src={`https://images.unsplash.com/photo-${1467003909585 + recipe.id}?w=1200&h=800&fit=crop`}
+                  src={imageUrl || "/placeholder.jpg"}
                   alt={recipe.name}
                   className="w-full h-full object-cover"
                 />

@@ -1,9 +1,7 @@
 import { useEffect, useState, ReactNode } from "react"
 import { supabase } from "@/lib/supabase"
 import { AuthContext, Profile } from "./AuthContext"
-import type { User, Session, AuthError } from "@supabase/supabase-js"
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+import type { User, Session } from "@supabase/supabase-js"
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -11,22 +9,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Initialize Supabase session and user
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    const initSession = async () => {
+      const { data } = await supabase.auth.getSession()
       setSession(data.session)
       setUser(data.session?.user ?? null)
-      if (data.session?.user) {
-        fetchProfile(data.session.user.id)
-      }
       setLoading(false)
-    })
+    }
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
+    initSession()
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
+      if (!session?.user) {
         setProfile(null)
       }
     })
@@ -34,13 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  const fetchProfile = async (userId: string) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/${userId}`)
-    if (res.ok) {
-      setProfile(await res.json())
-    }
-  }
-
+  // Sign-up using Supabase
   const signUp = async (
     email: string,
     password: string,
@@ -55,23 +46,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     })
 
+    // Set user in state
     if (data.user) {
-      await fetch(`${API_BASE_URL}/api/users/profile`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: data.user.id,
-          email,
-          username,
-          first_name: firstName,
-        }),
+      setUser(data.user)
+      setProfile({
+        id: data.user.id,
+        email,
+        username,
+        first_name: firstName,
       })
-      await fetchProfile(data.user.id)
     }
 
     return { error }
   }
 
+  // Sign-in using Supabase
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -79,13 +68,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     if (data.user) {
-      await fetchProfile(data.user.id)
+      setUser(data.user)
+      // Profile info from Supabase user metadata
+      setProfile({
+        id: data.user.id,
+        email: data.user.email ?? "",
+        username: data.user.user_metadata.username,
+        first_name: data.user.user_metadata.first_name,
+      })
+
+      // Migrate local favorites to database
       await migrateFavorites(data.user.id)
     }
 
     return { error }
   }
 
+  // Sign-out
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
@@ -93,12 +92,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null)
   }
 
+  // Migrate local favorites to Supabase-backed favorites
   const migrateFavorites = async (userId: string) => {
-    const local = JSON.parse(localStorage.getItem("favorites") || "[]") as number[]
-    if (local.length === 0) return
+    const localFavorites = JSON.parse(localStorage.getItem("favorites") || "[]") as number[]
+    if (localFavorites.length === 0) return
 
-    for (const recipeId of local) {
-      await fetch(`${API_BASE_URL}/api/users/${userId}/favorites/${recipeId}`, {
+    for (const recipeId of localFavorites) {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api/users/${userId}/favorites/${recipeId}`, {
         method: "POST",
       })
     }

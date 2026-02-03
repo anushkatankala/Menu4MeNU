@@ -1,18 +1,12 @@
 package FoodApplication.controller;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import FoodApplication.model.Food;
 import FoodApplication.repo.RecipesRepo;
 import FoodApplication.service.RecipesExcelService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/foods")
@@ -32,7 +26,6 @@ public class FoodController {
      * Fetches all foods from the PostgreSQL database
      */
     @GetMapping
-    @SuppressWarnings("CallToPrintStackTrace")
     public ResponseEntity<List<Food>> getAllFoods() {
         try {
             List<Food> foods = recipesRepo.findAll();
@@ -59,7 +52,6 @@ public class FoodController {
      * Search foods by name (case-insensitive)
      */
     @GetMapping("/search")
-    @SuppressWarnings("CallToPrintStackTrace")
     public ResponseEntity<List<Food>> searchFoodsByName(@RequestParam String name) {
         try {
             List<Food> foods = recipesRepo.findByNameContainingIgnoreCase(name);
@@ -76,7 +68,6 @@ public class FoodController {
      * This is kept from your original code in case you need it
      */
     @GetMapping("/import")
-    @SuppressWarnings("CallToPrintStackTrace")
     public ResponseEntity<String> importExcelToPostgres() {
         try {
             recipesExcelService.importExcelToPostgres();
